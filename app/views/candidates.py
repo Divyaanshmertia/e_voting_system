@@ -66,12 +66,5 @@ def delete_candidate(candidate_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
-def candidate_to_dict(candidate):
-    return {
-        'id': candidate.id,
-        'name': candidate.name,
-        'party': candidate.party,
-        'constituency': candidate.constituency
-    }
 
-Candidate.to_dict = candidate_to_dict
+

@@ -14,3 +14,11 @@ class Candidate(db.Model):
 
     def __repr__(self):
         return f'<Candidate {self.name}>'
+
+    def candidate_to_dict(candidate):
+        return {
+            'id': candidate.id,
+            'name': candidate.name,
+            'party': candidate.party,
+            'constituency': candidate.constituency
+        }

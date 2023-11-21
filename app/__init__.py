@@ -23,4 +23,10 @@ def create_app():
     from app.views.candidates import candidate_blueprint
     app.register_blueprint(candidate_blueprint, url_prefix='/api')
 
+    from app.views.votes import vote_blueprint
+    app.register_blueprint(vote_blueprint, url_prefix='/api')
+
+    from app.views.user_images import user_image_blueprint
+    app.register_blueprint(user_image_blueprint, url_prefix='/api')
+
     return app

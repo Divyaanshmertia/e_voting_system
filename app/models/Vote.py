@@ -12,3 +12,12 @@ class Vote(db.Model):
 
     def __repr__(self):
         return f'<Vote {self.user_id} for {self.candidate_id}>'
+
+    # This function converts the Vote object to a dictionary
+    def vote_to_dict(vote):
+        return {
+            'id': vote.id,
+            'user_id': vote.user_id,
+            'candidate_id': vote.candidate_id,
+            'timestamp': vote.timestamp.isoformat()
+        }
