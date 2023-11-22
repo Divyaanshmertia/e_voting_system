@@ -2,13 +2,18 @@
 <html>
 <head>
     <title>Facial Recognition</title>
-<!--    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>-->
-<!--    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>-->
-<!--    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>-->
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+    <!-- TensorFlow.js Core, required by face-api.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@1.7.4"></script>
+    <!-- TensorFlow.js Converter, required by face-api.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@1.7.4"></script>
+    <!-- TensorFlow.js WebGL backend, required by face-api.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"></script>
+    <!-- face-api.js library -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <!-- Your JavaScript file -->
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <video id="video" width="720" height="560" autoplay muted></video>
-    <script type="text/javascript" src="../static/script.js"></script>
 </body>
 </html>

@@ -1,7 +1,13 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect, render_template, url_for
+from werkzeug.security import generate_password_hash
+
 from app import db
 from app.models import User, UserImage
 from sqlalchemy.exc import SQLAlchemyError
+from flask_login import login_user, logout_user, current_user
+from flask import Flask, flash, redirect, render_template, \
+     request, url_for
+from app.forms import LoginForm, SignupForm
 
 user_blueprint = Blueprint('user_blueprint', __name__)
 
@@ -78,3 +84,45 @@ def delete_user(user_id):
     except SQLAlchemyError as e:
         return jsonify({"error": str(e)}), 500
 
+
+@user_blueprint.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard_blueprint.dashboard'))
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for('dashboard_blueprint.dashboard'))
+
+        else:
+            flash('Invalid email or password')
+    return render_template('login.html', form = form)
+
+
+@user_blueprint.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = SignupForm()
+    if form.validate_on_submit():
+        user = User(
+            voter_id=form.voter_id.data,
+            name=form.name.data,
+            email=form.email.data,
+            password_hash=generate_password_hash(form.password.data),
+            constituency=form.constituency.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        # Redirect to a different page, e.g., login
+        return redirect(url_for('login'))
+    return render_template('signup.html', form=form)
+
+
+@user_blueprint.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('user_blueprint.login'))

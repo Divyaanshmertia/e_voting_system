@@ -11,6 +11,8 @@ async function initializeFaceRecognition() {
         await faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
         await faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
         await faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
+        await faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
+
 
     ]);
 

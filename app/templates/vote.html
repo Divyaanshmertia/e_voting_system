@@ -4,34 +4,25 @@
 
 {% block additional_links %}
 <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a class="nav-link" href="{{ url_for('dashboard_blueprint.dashboard') }}">Dashboard</a>
 </li>
 {% endblock %}
 
 {% block title %}Vote{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <!-- Enhanced Vote Now title -->
     <h1 class="text-center display-4 mb-5">Vote Now</h1>
-    <form action="{{ url_for('submit_vote') }}" method="post">
+    <form action="{{ url_for('vote_blueprint.vote') }}" method="post">
         <div class="row justify-content-center">
-            <!-- Party A -->
+            {% for candidate in candidates %}
             <div class="voting-block card shadow col-md-4 mx-2 bg-light">
                 <div class="card-body text-center">
-                    <img src="static/images/partyA.jpg" alt="Party A" class="party-photo">
-                    <div class="party-name h5">Party A</div>
-                    <button type="submit" name="vote" value="party_a" class="btn btn-primary">Vote for Party A</button>
+                    <img src="{{ url_for('static', filename='images/candidates/' + candidate.name|replace(' ', '_') + '.jpg') }}" alt="{{ candidate.name }}" class="party-photo">
+                    <div class="party-name h5">{{ candidate.name }}</div>
+                    <button type="submit" name="vote" value="{{ candidate.id }}" class="btn btn-primary">Vote for {{ candidate.name }}</button>
                 </div>
             </div>
-
-            <!-- Party B -->
-            <div class="voting-block card shadow col-md-4 mx-2 bg-light">
-                <div class="card-body text-center">
-                    <img src="static/images/partyB.jpg" alt="Party B" class="party-photo">
-                    <div class="party-name h5">Party B</div>
-                    <button type="submit" name="vote" value="party_b" class="btn btn-primary">Vote for Party B</button>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </form>
 </div>

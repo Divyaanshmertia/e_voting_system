@@ -6,11 +6,16 @@
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="signup-form bg-light mt-4 p-4">
-            <form action="{{ url_for('signup') }}" method="post" class="row g-3">
+            <form action="{{ url_for('user_blueprint.signup') }}" method="post" class="row g-3">
+                {{ form.hidden_tag() }}
                 <h4>Join E-Voting</h4>
                 <div class="col-12">
+                    <label>Voter ID</label>
+                    <input type="text" name="voter_id" class="form-control" placeholder="Voter ID" required>
+                </div>
+                <div class="col-12">
                     <label>Full Name</label>
-                    <input type="text" name="fullname" class="form-control" placeholder="Full Name" required>
+                    <input type="text" name="name" class="form-control" placeholder="Full Name" required>
                 </div>
                 <div class="col-12">
                     <label>Email</label>
@@ -21,8 +26,8 @@
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
                 </div>
                 <div class="col-12">
-                    <label>Confirm Password</label>
-                    <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                    <label>Constituency</label>
+                    <input type="text" name="constituency" class="form-control" placeholder="Constituency">
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-dark float-end">Signup</button>
@@ -30,7 +35,7 @@
             </form>
             <hr class="mt-4">
             <div class="col-12">
-                <p class="text-center mb-0">Already have an account? <a href="{{ url_for('home') }}">Login</a></p>
+                <p class="text-center mb-0">Already have an account? <a href="{{ url_for('user_blueprint.login') }}">Login</a></p>
             </div>
         </div>
     </div>
