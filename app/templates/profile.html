@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block body_class %}vote-page{% endblock %} <!-- Using vote-page class for background -->
+
+{% block additional_links %}
+<li class="nav-item">
+    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+</li>
+{% endblock %}
+
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center display-4 mb-5">Welcome to Profile</h1>
+    <p class="text-center">Welcome to your profile!</p>
+</div>
+{% endblock %}

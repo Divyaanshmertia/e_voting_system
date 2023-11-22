@@ -9,7 +9,6 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     constituency = db.Column(db.String(100))  # Constituency of the voter
-    password = db.Column(db.String(100))
     # Relationships
     votes = db.relationship('Vote', backref='voter', lazy='dynamic')
     images = db.relationship('UserImage', backref='user', lazy='dynamic')

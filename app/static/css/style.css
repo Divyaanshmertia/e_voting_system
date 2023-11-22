@@ -1,0 +1,54 @@
+body {
+    background: url('../images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+body.dashboard-page {
+    background: url('../images/dashboard_background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    /* Or set a solid color instead of an image */
+    /* background-color: #yourColorCode; */
+}
+
+.vote-page {
+    background: url('../images/dashboard_background.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Additional styles for cards, buttons, etc. */
+
+
+.login-form, .signup-form {
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 40px;
+    margin-top: 50px;
+}
+
+/* Add other styles as needed */
+
+
+.voting-block {
+    margin-bottom: 20px;
+}
+
+.party-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    border: 3px solid white; /* Optional: Adds a border around the photo */
+}
+
+/* You may want to adjust the button styling to fit better within the card */
+.btn-primary {
+    margin-top: 10px;
+}
+
+.party-photo {
+    max-width: 100px;
+    height: auto;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}

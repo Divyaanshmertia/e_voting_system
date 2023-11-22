@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block additional_links %}
+<li class="nav-item">
+    <a class="nav-link btn btn-danger" href="{{ url_for('vote') }}">Vote</a>
+</li>
+{% endblock %}
+
+{% block body_class %}dashboard-page{% endblock %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <!-- Total Registration Card -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 bg-success text-white">
+                <div class="card-body">
+                    <div class="card-title">Total Registration</div>
+                    <div class="h5 mb-0 font-weight-bold">30,462</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Vote Casted Card -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2 bg-danger text-white">
+                <div class="card-body">
+                    <div class="card-title">Total Vote Casted</div>
+                    <div class="h5 mb-0 font-weight-bold">{{ votes['party_a'] + votes['party_b'] }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Party A Vote Count -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2">
+                <div class="card-body text-center">
+                    <img src="static/images/partyA.jpg" alt="Party A" class="party-photo">
+                    <div class="card-title mt-2">Votes for Party A</div>
+                    <div class="h5 mb-0 font-weight-bold">{{ votes['party_a'] }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Party B Vote Count -->
+        <div class="col-lg-6 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2">
+                <div class="card-body text-center">
+                    <img src="static/images/partyB.jpg" alt="Party B" class="party-photo">
+                    <div class="card-title mt-2">Votes for Party B</div>
+                    <div class="h5 mb-0 font-weight-bold">{{ votes['party_b'] }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logout Button -->
+<div style="position: fixed; bottom: 20px; right: 20px;">
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+</div>
+{% endblock %}

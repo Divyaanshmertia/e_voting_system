@@ -1,9 +1,19 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models.User import User
+from app.models import User, UserImage
 from sqlalchemy.exc import SQLAlchemyError
 
 user_blueprint = Blueprint('user_blueprint', __name__)
+
+@user_blueprint.route('/user/<int:user_id>/images', methods=['GET'])
+def get_user_images(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    image_urls = [image.image_url for image in user.images.all()]
+    return jsonify({'user_id': user_id, 'images': image_urls})
+
 
 @user_blueprint.route('/users', methods=['GET'])
 def get_users():
