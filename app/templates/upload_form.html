@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File</title>
+</head>
+<body>
+    <h1>File Upload</h1>
+    <!-- Make sure the 'action' attribute matches the route in your Flask app -->
+   <form method="post" action="/upload" enctype="multipart/form-data">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br><br>
+    <label for="file">Choose a file:</label>
+    <input type="file" id="file" name="file"><br><br>
+    <input type="submit" value="Upload">
+</form>
+</body>
+</html>

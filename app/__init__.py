@@ -3,19 +3,26 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_login import LoginManager, login_required
+from google.cloud import storage
+from flask import Flask, render_template, redirect, url_for, request  # Import 'request' here
+from flask import jsonify
+from google.cloud import storage
 
+import requests
 # Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+
+
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
 
     # Configure your Flask app
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:divyaansh@34.31.96.18/app'
-    app.config['GCS_BUCKET'] = 'divyaansh'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Divyaansh%40IITJ@34.136.108.197/app'
+    app.config['GCS_BUCKET'] = 'facerepo'
     app.config['SECRET_KEY'] = 'your_very_secret_key_here'
 
     # Initialize SQLAlchemy and Migrate with the app
@@ -74,8 +81,45 @@ def create_app():
     def profile():
         return render_template('profile.html')
 
+    from flask_login import current_user
+
     @app.route('/facial-recognition')
+    @login_required
     def facial_recognition():
-        return render_template('facial.html')
+        username = current_user.voter_id  # Assuming 'username' is the attribute for the user's username
+        return render_template('facial.html', username=username)
+
+    @app.route('/api/users/<username>/images')
+    def get_user_images(username):
+        # Verify that the requested username matches the logged-in user to prevent unauthorized access
+        client = storage.Client()
+        bucket = client.bucket(app.config['GCS_BUCKET'])
+        prefix = f'{username}/'
+        blobs = bucket.list_blobs(prefix=prefix)
+        image_urls = [blob.public_url for blob in blobs if blob.name.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        print(image_urls)
+        return jsonify({'images': image_urls})
+
+    @app.route('/upload', methods=['POST'])
+    def upload_file():
+        username = request.form['username']  # Retrieve username from form data
+        file = request.files.get('file')
+        if not file or file.filename == '':
+            return redirect(request.url)
+        else:
+            client = storage.Client()
+            bucket = client.bucket(app.config['GCS_BUCKET'])
+            # Include the username in the blob path
+            blob_path = f"{username}/{file.filename}"
+            blob = bucket.blob(blob_path)
+            blob.upload_from_string(
+                file.read(),
+                content_type=file.content_type
+            )
+            return 'File uploaded successfully', 200
+
+    @app.route('/upload-form')
+    def show_upload_form():
+        return render_template('upload_form.html')
 
     return app

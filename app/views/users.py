@@ -118,7 +118,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         # Redirect to a different page, e.g., login
-        return redirect(url_for('login'))
+        return redirect(url_for(user_blueprint.login))
     return render_template('signup.html', form=form)
 
 

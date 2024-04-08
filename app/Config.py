@@ -10,8 +10,8 @@ class Config:
 
     # SQLAlchemy settings
     # For Cloud SQL (replace placeholders with your actual values)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'mysql+pymysql://username:password@/dbname?unix_socket=/cloudsql/instance_connection_name')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'mysql+pymysql://root@/db?unix_socket=/cloudsql/securityproject-419120:us-central1:db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     # Google Cloud Storage settings
     GCS_BUCKET = os.environ.get('GCS_BUCKET', 'your_default_gcs_bucket_name')

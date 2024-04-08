@@ -1,47 +1,49 @@
 import face_recognition
-import os
-import sys
-import cv2
+import io
+from google.cloud import storage
 import numpy as np
+import cv2
 import math
 
-
-def face_confidence(face_distance, face_match_threshold=0.6):
-    if face_distance > face_match_threshold:
-        return "Unknown"
-    else:
-        range = (1.0 - face_match_threshold)
-        linear_value = (1.0 - face_distance) / (range * 2.0)
-        value = (linear_value + ((1.0 - linear_value) * math.pow((linear_value - 0.5) * 2, 0.2))) * 100
-        return str(round(value, 2)) + '%'
-
-
 class FaceRecognition:
-    def __init__(self):
+    def __init__(self, username):
+        self.client = storage.Client()
+        self.bucket_name = 'facerepo'  # Ensure this matches your actual bucket name
+        self.bucket = self.client.bucket(self.bucket_name)
+        self.username = username
         self.known_face_encodings = []
         self.known_face_names = []
         self.encode_faces()
 
     def encode_faces(self):
-        base_dir = 'app/faces'
-        for person_name in os.listdir(base_dir):
-            person_dir = os.path.join(base_dir, person_name)
-            if os.path.isdir(person_dir):
-                for image_name in os.listdir(person_dir):
-                    image_path = os.path.join(person_dir, image_name)
-                    face_image = face_recognition.load_image_file(image_path)
-                    face_encodings = face_recognition.face_encodings(face_image)
-                    if face_encodings:
-                        face_encoding = face_encodings[0]
-                        self.known_face_encodings.append(face_encoding)
-                        self.known_face_names.append(person_name)
-        print(self.known_face_names)
+        user_folder = f"{self.username}/"  # Path to user's folder
+        blobs = self.bucket.list_blobs(prefix=user_folder)
+        for blob in blobs:
+            if not blob.name.lower().endswith(('.jpg', '.png')):
+                continue
+            blob_bytes = blob.download_as_bytes()
+            image = face_recognition.load_image_file(io.BytesIO(blob_bytes))
+            face_encodings = face_recognition.face_encodings(image)
+            if face_encodings:
+                self.known_face_encodings.append(face_encodings[0])
+                # Using the image name as a "name" for the face, adjust as needed
+                self.known_face_names.append(blob.name.split('/')[-1])
+
+    def face_confidence(self, face_distance, face_match_threshold=0.6):
+        if face_distance > face_match_threshold:
+            return "Unknown"
+        else:
+            range = (1.0 - face_match_threshold)
+            linear_value = (1.0 - face_distance) / (range * 2.0)
+            value = (linear_value + ((1.0 - linear_value) * math.pow((linear_value - 0.5) * 2, 0.2))) * 100
+            return str(round(value, 2)) + '%'
 
     def run_recognition(self):
         video_capture = cv2.VideoCapture(0)
 
         if not video_capture.isOpened():
-            sys.exit("Video Source not found .....")
+            print("Video Source not found .....")
+            return
 
         while True:
             ret, frame = video_capture.read()
@@ -61,7 +63,7 @@ class FaceRecognition:
                 best_match_index = np.argmin(face_distances)
                 if matches[best_match_index]:
                     name = self.known_face_names[best_match_index]
-                    confidence = face_confidence(face_distances[best_match_index])
+                    confidence = self.face_confidence(face_distances[best_match_index])
 
                 face_names.append(f'{name} ({confidence})')
 
@@ -72,8 +74,9 @@ class FaceRecognition:
                 left *= 4
 
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), -1)
-                cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255, 255, 255), 1)
+                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
 
             cv2.imshow('Face Recognition', frame)
 
@@ -83,7 +86,7 @@ class FaceRecognition:
         video_capture.release()
         cv2.destroyAllWindows()
 
-
 if __name__ == '__main__':
-    fr = FaceRecognition()
+    username = 'A002'  # This should be dynamically determined
+    fr = FaceRecognition(username)
     fr.run_recognition()

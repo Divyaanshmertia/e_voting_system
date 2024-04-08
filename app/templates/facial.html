@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Facial Recognition</title>
+
     <!-- TensorFlow.js Core, required by face-api.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@1.7.4"></script>
     <!-- TensorFlow.js Converter, required by face-api.js -->
@@ -13,7 +14,7 @@
     <!-- Your JavaScript file -->
     <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
-<body>
+    <body data-username="{{ username }}">
     <video id="video" width="720" height="560" autoplay muted></video>
 </body>
 </html>

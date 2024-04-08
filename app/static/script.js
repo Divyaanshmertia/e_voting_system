@@ -7,82 +7,105 @@ let recognitionStartTime = null;
 
 async function initializeFaceRecognition() {
     const video = document.getElementById('video');
-    const userId = 1; // Replace with actual user ID
-    const imageUrls = await fetchUserImages(userId);
+    const username = document.body.getAttribute('data-username');
 
-    // Load face-api.js models
-    await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
-        faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
-    ]);
-
-    // Process and label the user's face descriptors
-    const labeledFaceDescriptors = await Promise.all(imageUrls.map(async url => {
-        const img = await faceapi.fetchImage(url);
-        const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-        return new faceapi.LabeledFaceDescriptors(userId.toString(), [detections.descriptor]);
-    }));
-
-    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
-    startVideo(video, faceMatcher);
-}
-async function fetchUserImages(userId) {
     try {
-        const response = await fetch(`/api/users/user/${userId}/images`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data.images; // Array of image URLs
+        await loadModels();
+        const imageUrls = await fetchUserImages(username);
+        const labeledFaceDescriptors = await createLabeledFaceDescriptors(imageUrls, username);
+        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+        startVideo(video, faceMatcher);
     } catch (error) {
-        console.error("Could not fetch user images:", error);
+        console.error("Error during face recognition initialization:", error);
     }
 }
 
+async function fetchUserImages(username) {
+    try {
+        const response = await fetch(`/api/users/${username}/images`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch images: ${response.statusText}`);
+        }
+        const { images } = await response.json();
+        return images;
+    } catch (error) {
+        console.error("Error fetching user images:", error);
+        throw error; // Rethrow to be caught in the calling function
+    }
+}
+
+async function loadModels() {
+    try {
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
+            faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
+        ]);
+    } catch (error) {
+        console.error("Error loading models:", error);
+        throw error; // Rethrow to be caught in the calling function
+    }
+}
+
+async function createLabeledFaceDescriptors(blobUrls, username) {
+    // Load each image from a blob URL and create descriptors
+    return Promise.all(blobUrls.map(async (blobUrl) => {
+        try {
+            const img = await faceapi.fetchImage(blobUrl);
+            const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+            if (detection) {
+                return new faceapi.LabeledFaceDescriptors(username, [detection.descriptor]);
+            }
+        } catch (error) {
+            console.error("Error processing image URL:", blobUrl, error);
+            return null; // Return null to filter out this image
+        }
+    })).then(descriptors => descriptors.filter(descriptor => descriptor !== null)); // Filter out any null descriptors
+}
+
 async function startVideo(video, faceMatcher) {
-    // Initialize webcam
-    navigator.getUserMedia({ video: {} }, stream => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
         video.srcObject = stream;
-    }, err => console.error(err));
+        video.onloadedmetadata = () => { video.play(); setupRecognition(video, faceMatcher); };
+    } catch (error) {
+        console.error("Error starting video:", error);
+    }
+}
 
-    video.addEventListener('play', () => {
-        // Set up canvas for facial recognition
-        const canvas = faceapi.createCanvasFromMedia(video);
-        document.body.append(canvas);
-        const displaySize = { width: video.width, height: video.height };
-        faceapi.matchDimensions(canvas, displaySize);
+function setupRecognition(video, faceMatcher) {
+    const canvas = faceapi.createCanvasFromMedia(video);
+    document.body.append(canvas);
+    const displaySize = { width: video.width, height: video.height };
+    faceapi.matchDimensions(canvas, displaySize);
 
-        setInterval(async () => {
-            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-                .withFaceLandmarks()
-                .withFaceDescriptors();
-            const resizedDetections = faceapi.resizeResults(detections, displaySize);
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            faceapi.draw.drawDetections(canvas, resizedDetections);
-            faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+    setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptors();
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        faceapi.draw.drawDetections(canvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
 
-            // Check each detection and match faces
-            detections.forEach(detection => {
-                const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
-                if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.5) {
-                    handleSuccessfulRecognition();
-                } else {
-                    resetRecognition();
-                }
-            });
-        }, 100);
-    });
+        detections.forEach(detection => {
+            const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+            if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.5) {
+                handleSuccessfulRecognition();
+            } else {
+                resetRecognition();
+            }
+        });
+    }, 100);
 }
 
 function handleSuccessfulRecognition() {
     if (!recognitionActive) {
         recognitionActive = true;
         recognitionStartTime = new Date();
-    } else if (new Date() - recognitionStartTime > 5000) { // 10 seconds
-        window.location.href = '/vote/vote'; // Redirect to the voting page
+    } else if (new Date() - recognitionStartTime > 5000) {
+        window.location.href = '/vote/vote';
     }
 }
 

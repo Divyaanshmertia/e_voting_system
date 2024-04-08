@@ -17,7 +17,8 @@
             {% for candidate in candidates %}
             <div class="voting-block card shadow col-md-4 mx-2 bg-light">
                 <div class="card-body text-center">
-                    <img src="{{ url_for('static', filename='images/candidates/' + candidate.name|replace(' ', '_') + '.jpg') }}" alt="{{ candidate.name }}" class="party-photo">
+                    <!-- Use candidate.image_url for the image src -->
+                    <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="party-photo">
                     <div class="party-name h5">{{ candidate.name }}</div>
                     <button type="submit" name="vote" value="{{ candidate.id }}" class="btn btn-primary">Vote for {{ candidate.name }}</button>
                 </div>
